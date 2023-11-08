@@ -90,7 +90,6 @@ int main(int argc, char const *argv[])
         // 0x0D = ENTER
         if ( (ch >= 0x28 && ch < 0x39) || (ch == 'c') || (ch == 'C') || (ch == 0x0D))
         {
-            printf("%c",ch);
             // C for CLEAR
             if (ch == 'c' || ch == 'C')
             {
@@ -106,14 +105,30 @@ int main(int argc, char const *argv[])
             // ENTER
             else if (ch == 0x0D)
             {
+                // Transfer string in myQueue to myRPN string
+                while (!myQueue.empty())
+                {
+                    myRPN.push_back(myQueue.front());
+                    myQueue.pop();
+                }
+                myRPN.append(" ");
+                while (!myStack.empty())
+                {
+                    // pop out to the RPN string
+                    myRPN.push_back(char(myStack.top()));
+                    myRPN.append(" ");
+                    myStack.pop();
+                }
                 printf("\nRPN string \"%s\"", myRPN.c_str());
                 printf("\nmyStack.size() is \"%i\"", myStack.size());
                 printf("\nmyQueue.size() is \"%i\"", myQueue.size());
+                myRPN.clear();
             }
             // Numbers 0-9
             else if (ch >= 0x30 && ch < 0x39)
             {
                 myQueue.push(ch);
+                printf("%c",ch);
             }
             // PEMDAS 7 operators ( ) ^ * + - /
             else if (checkPEMDASops(ch))
@@ -125,9 +140,11 @@ int main(int argc, char const *argv[])
                     myQueue.pop();
                 }
                 myRPN.append(" ");
-                printf("\n%c\n", ch);
                 if (myStack.empty())
+                {
                     myStack.push(ch);
+                    printf("%c",ch);
+                }
                 else
                 {
                     // If ')' is pressed, pop out all the symbols in myStack until '('
@@ -144,7 +161,7 @@ int main(int argc, char const *argv[])
                                 myStack.pop();
                             }
                             myStack.pop(); // Clear the '('
-                            printf("\n)\n");
+                            printf(")");
                         }
                     }
                     else if (checkPrecedence(ch, myStack.top()))
@@ -155,7 +172,7 @@ int main(int argc, char const *argv[])
                         {
                             ++countOpenParenthesis;
                         }
-                        printf("\n%c\n", ch);
+                        printf("%c", ch);
                     }
                     else
                     {
@@ -163,8 +180,9 @@ int main(int argc, char const *argv[])
                         myRPN.push_back(char(myStack.top()));
                         myRPN.append(" ");
                         myStack.pop();
+                        // push the lower precedence PEMDAS
                         myStack.push(ch);
-                        printf("\n%c\n", ch);
+                        printf("%c", ch);
                     }
                 }
             }
